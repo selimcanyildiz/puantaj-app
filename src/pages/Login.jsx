@@ -1,10 +1,10 @@
 import { useState } from "react"
 import Button from "../components/Button"
 import Input from "../components/Input"
+import toast from "react-hot-toast"
 
 const users = [
-  { username: "admin", password: "1234" },
-  { username: "user", password: "1234" },
+  { username: "cansu", password: "kerim" },
 ]
 
 export default function Login({ onLogin }) {
@@ -12,12 +12,22 @@ export default function Login({ onLogin }) {
   const [password, setPassword] = useState("")
 
   const login = () => {
+    if (!username || !password) {
+      toast.error("Kullanıcı adı ve şifre zorunlu")
+      return
+    }
+
     const ok = users.find(
       u => u.username === username && u.password === password
     )
-    if (!ok) return alert("Hatalı giriş")
+
+    if (!ok) {
+      toast.error("Kullanıcı adı veya şifre hatalı")
+      return
+    }
 
     localStorage.setItem("user", JSON.stringify(ok))
+    toast.success("Giriş başarılı")
     onLogin()
   }
 
@@ -27,8 +37,17 @@ export default function Login({ onLogin }) {
         <h1 className="text-xl font-bold mb-6 text-center">Giriş</h1>
 
         <div className="space-y-3">
-          <Input placeholder="Kullanıcı" onChange={e => setUsername(e.target.value)} />
-          <Input type="password" placeholder="Şifre" onChange={e => setPassword(e.target.value)} />
+          <Input
+            placeholder="Kullanıcı"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+          />
+          <Input
+            type="password"
+            placeholder="Şifre"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+          />
           <Button className="w-full" onClick={login}>
             Giriş Yap
           </Button>
