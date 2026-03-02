@@ -9,7 +9,10 @@ export default function Puantaj() {
   const [personnel, setPersonnel] = useState([])
   const [sites, setSites] = useState([])
   const [records, setRecords] = useState([])
-  const [month, setMonth] = useState("2026-02")
+  const [month, setMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  })
 
   const [year, m] = month.split("-")
   const daysInMonth = new Date(year, m, 0).getDate()
