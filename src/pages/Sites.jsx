@@ -3,22 +3,39 @@ import AppLayout from "../layout/AppLayout"
 import Card from "../components/Card"
 import Input from "../components/Input"
 import Button from "../components/Button"
-import { getData, setData } from "../utils/storage"
+import { getSites, addSite, deleteSite } from "../utils/api"
+import toast from "react-hot-toast"
 
 export default function Sites() {
   const [list, setList] = useState([])
   const [name, setName] = useState("")
 
   useEffect(() => {
-    setList(getData("sites"))
+    getSites()
+      .then(setList)
+      .catch(() => toast.error("Şantiye listesi alınamadı"))
   }, [])
 
-  const add = () => {
-    if (!name) return
-    const updated = [...list, { id: Date.now(), name }]
-    setList(updated)
-    setData("sites", updated)
-    setName("")
+  const add = async () => {
+    if (!name.trim()) return
+    try {
+      const site = await addSite(name.trim())
+      setList(prev => [...prev, site])
+      setName("")
+      toast.success("Şantiye eklendi")
+    } catch (err) {
+      toast.error(err.message)
+    }
+  }
+
+  const remove = async (id, siteName) => {
+    try {
+      await deleteSite(id)
+      setList(prev => prev.filter(s => s.id !== id))
+      toast.success(`${siteName} silindi`)
+    } catch (err) {
+      toast.error(err.message)
+    }
   }
 
   return (
@@ -32,11 +49,18 @@ export default function Sites() {
           />
           <Button onClick={add}>Ekle</Button>
         </div>
-
         <ul className="divide-y">
           {list.map(s => (
-            <li key={s.id} className="py-2">
-              {s.name}
+            <li key={s.id} className="py-2 flex justify-between items-center">
+              <span>{s.name}</span>
+              {s.code !== "LEAVE" && (
+                <button
+                  onClick={() => remove(s.id, s.name)}
+                  className="text-xs text-red-400 hover:text-red-600"
+                >
+                  Sil
+                </button>
+              )}
             </li>
           ))}
         </ul>
